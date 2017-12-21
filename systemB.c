@@ -4,11 +4,14 @@
 #include <stdlib.h>
 #include <string.h>
 #define M 10 /*最大课程数量*/
-#define N 50 /*学号最大长度, 学生数量*/
+#define N 50 /*学号、密码最大长度, 学生数量*/
+#define USER "admin"
+#define PWD "admin"
 
 
 typedef struct {
 	char id[N];
+	char pwd[N];
 	float score[M];
 	float sum;
 }Student;
@@ -17,60 +20,51 @@ typedef struct {
 	int stu; /*学生数量*/
 }Num;
 
+int login(); /*登录系统*/
 Num score(Student *stu);
 void report(Student *stu, Num num);
 void sort(Student *stu, Num num);
 void search(Student *stu, Num num);
+void teacher(); /*教师操作界面*/
 
+Student stu_score[N];
+Student stu_report[N];
+Student stu_sort[N];
+Student stu_search[N];
+Num num;
 
 void main() {
-	Student stu_score[N];
-	Student stu_report[N];
-	Student stu_sort[N];
-	Student stu_search[N];
-	Num num;
 	int choice;
-	while (1) {
+	int identify;
+	printf("\t-----------------欢迎使用学生成绩管理系统！----------------------\n");
+	printf("\t| 登录                                            \t- 请输入1 |\n");
+	printf("\t| 退出                                            \t- 请输入2 |\n");
+	printf("\n输入您的选择：");
+	scanf_s("%d", &choice);
+	getchar();
+	/*判断用户是否决定登录，若是，给出登录界面*/
+	if (choice == 1) identify = login();
+	else if (choice == 2) {
+		printf("\t成功登出！\n");
+		system("pause");
+		return;
+	}
+	else {
+		printf("\t输入有误！");
+		system("pause");
+		return;
+	}
 
-
-		printf("\t-----------------欢迎使用学生成绩管理系统！----------------------\n");
-		printf("\t| 成绩初始化录入                                   \t- 请输入1 |\n");
-		printf("\t| 计算各科成绩的最高分最低分平均分及每人的总成绩 \t- 请输入2 |\n");
-		printf("\t| 按照单科成绩和个人总成绩进行降序排序                  - 请输入3 |\n");
-		printf("\t| 按学号查询学生的各科成绩                         \t- 请输入4 |\n");
-		printf("\t| 其他功能敬请期待...                             \t          |\n");
-		printf("\t|                                                \t          |\n");
-		printf("\t|                                                \t          |\n");
-		printf("\t| 退出                                            \t- 请输入5 |\n");
-		printf("\t-----------------------------------------------------------------\n");
-		printf("你的选择是：  ");
-		scanf_s("%d", &choice);
-
-		switch (choice)
-		{
-		case 1: printf("-----------------正在录入---------------\n");
-			num = score(stu_score);
-			printf("-----------------录入完成---------------\n");
-			break;
-		case 2: printf("-----------------成绩计算--------------\n");
-			report(stu_report, num);
-			printf("-----------------计算完成--------------\n");
-			break;
-		case 3: printf("-----------------成绩排序--------------\n");
-			sort(stu_sort, num);
-			printf("-----------------排序完成--------------\n");
-			break;
-		case 4: printf("-----------------成绩查询--------------\n");
-			search(stu_search, num);
-			printf("-----------------查询完成--------------\n");
-			break;
-		case 5: printf("-----------------退出系统--------------\n");
-			return 0;
-		}
+	/*通过login()返回值判断用户身份，若验证通过，给出操作界面*/
+	if (identify == 1) {
+		printf("\n教师%s, 您已成功登录！\n\n", USER);
 		system("pause");
 		system("cls");
-		printf("\n\n");
+		teacher();
 	}
+	/*else if (identify == 2) student();*/
+	else printf("未通过身份验证！\n");
+	
 }
 
 Num score(Student *stu) {
@@ -347,4 +341,72 @@ void sort_by_final(Student *final_rank, Num num) {
 		}
 	}
 
+}
+
+void teacher() {
+	int choice;
+	while (1) { 
+		printf("\t-----------------欢迎使用学生成绩管理系统！----------------------\n");
+		printf("\t| 成绩初始化录入                                   \t- 请输入1 |\n");
+		printf("\t| 计算各科成绩的最高分最低分平均分及每人的总成绩 \t- 请输入2 |\n");
+		printf("\t| 按照单科成绩和个人总成绩进行降序排序                  - 请输入3 |\n");
+		printf("\t| 按学号查询学生的各科成绩                         \t- 请输入4 |\n");
+		printf("\t| 其他功能敬请期待...                             \t          |\n");
+		printf("\t|                                                \t          |\n");
+		printf("\t|                                                \t          |\n");
+		printf("\t| 退出                                            \t- 请输入5 |\n");
+		printf("\t-----------------------------------------------------------------\n");
+		printf("你的选择是：  ");
+		scanf_s("%d", &choice);
+
+		switch (choice)
+		{
+		case 1: printf("-----------------正在录入---------------\n");
+			num = score(stu_score);
+			printf("-----------------录入完成---------------\n");
+			break;
+		case 2: printf("-----------------成绩计算--------------\n");
+			report(stu_report, num);
+			printf("-----------------计算完成--------------\n");
+			break;
+		case 3: printf("-----------------成绩排序--------------\n");
+			sort(stu_sort, num);
+			printf("-----------------排序完成--------------\n");
+			break;
+		case 4: printf("-----------------成绩查询--------------\n");
+			search(stu_search, num);
+			printf("-----------------查询完成--------------\n");
+			break;
+		case 5: printf("-----------------退出系统--------------\n");
+			return 0;
+		}
+		system("pause");
+		system("cls");
+		printf("\n\n");
+	}
+}
+
+int login() {
+	char user[17];
+	char pwd[21];
+	int count = 0;
+
+	do
+	{
+		if (count == 3) {
+			printf("\t您已三次输错密码，系统将关闭！\n");
+			return 0;
+		}
+		else if (count > 0)
+			printf("\t密码错误！您还有%d次机会！\n", (3-count));
+
+		printf("\n用户名：");
+		gets(user);
+		printf("\n密码：");
+		gets(pwd);
+		count++;
+
+	} while ((strcmp(user, USER)) || (strcmp(pwd, PWD))) /*循环条件：密码或账号不匹配*/;
+
+	return 1;
 }
