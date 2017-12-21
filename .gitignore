@@ -1,0 +1,10 @@
+##ignore this file##
+/C Project/
+/Debug/
+/.vs/
+
+
+##filter .jpg, .sln##
+*.sln
+*.jpg
+
