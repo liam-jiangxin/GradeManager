@@ -37,6 +37,7 @@ Num num = { 0, 0 };
 void main() {
 	int choice; /*菜单选择变量*/
 	char *which;
+	char id[MAX_USER];
 	/* 若已经创建过info.txt，则从info.txt读取学生、课程数量和学号 */
 	FILE *fp;
 	errno_t err;
@@ -72,12 +73,10 @@ void main() {
 		teacher();
 	}
 	if (choice == 2 && *(which=login(choice)) != '-1') {
-		printf("\n学生%s, 您已成功登录！\n\n", which);
+		strcpy_s(id, MAX_USER, which);
+		printf("\n学生%s, 您已成功登录！\n\n", id);
 		system("pause");
 		system("cls");
-		/* 将返回的学号保存到数组中，并传递给student函数*/
-		char id[MAX_USER];
-		strcpy_s(id, MAX_USER, which);
 		student(id);
 	}
 	
@@ -311,17 +310,17 @@ void search( Num num) {
 			printf("学生%s的成绩单：\n", id);
 			fprintf(out, "学生%s的成绩单：\n", id);
 			for (j = 0; j < num.course; j++, course++) {
-				fprintf(out, "课程%c ", course);
-				printf("课程%c ", course);
+				fprintf(out, "课程%c\t", course);
+				printf("课程%c\t", course);
 			}
 			fprintf(out, "总成绩\n");
 			printf("总成绩\n");
 			for (j = 0; j < num.course; j++) {
-				printf("%6.2f", stu[i].score[j]);
-				fprintf(out, "%6.2f", stu[i].score[j]);
+				printf("%.1f\t", stu[i].score[j]);
+				fprintf(out, "%.1f\t", stu[i].score[j]);
 			}
-			printf("%6.2f\n", stu[i].sum);
-			fprintf(out, "%6.2f\n", stu[i].sum);
+			printf("%.1f\n", stu[i].sum);
+			fprintf(out, "%.1f\n", stu[i].sum);
 			break;
 		}
 	}
@@ -542,6 +541,8 @@ void modify(char *id) {
 	char filename[20] = "info.txt";
 	int success = 0; /*成功登录的标记*/
 	Student stu[N];
+	char confirm_pwd[MAX_PWD];
+	char new_pwd[MAX_PWD];
 
 	 /*从info.txt读取数据*/
 	if ((err = fopen_s(&fp, filename, "r")) != 0) {
@@ -558,8 +559,6 @@ void modify(char *id) {
 
 	for (i = 0; i < num.stu; i++) {
 		if (strcmp(id, stu[i].id) == 0) {
-			char confirm_pwd[MAX_PWD];
-			char new_pwd[MAX_PWD];
 			printf("请输入新密码：");
 			scanf_s("%s", new_pwd, MAX_PWD);
 			printf("请确认新密码：");
@@ -569,20 +568,19 @@ void modify(char *id) {
 				printf("修改成功！\n");
 			}
 		}
-		/* 修改info.txt 文件 */
-		if ((err = fopen_s(&fp, filename, "w")) != 0) {
-			printf("无法打开\"%s\"\n", filename);
-			exit(0);
-		}
-		fprintf(fp, "%d %d", num.stu, num.course);
-		fprintf(fp, "\n");
-		for (i = 0; i < num.stu; i++) {
-			fprintf(fp, "%s %s\n", stu[i].id, stu[i].pwd);
-		}
-		fclose(fp);
-
-
 	}
+	/* 修改info.txt 文件 */
+	if ((err = fopen_s(&fp, filename, "w")) != 0) {
+		printf("无法打开\"%s\"\n", filename);
+		exit(0);
+	}
+	fprintf(fp, "%d %d", num.stu, num.course);
+	fprintf(fp, "\n");
+	for (i = 0; i < num.stu; i++) {
+		fprintf(fp, "%s %s\n", stu[i].id, stu[i].pwd);
+	}
+	fclose(fp);
+
 
 }
 
@@ -590,7 +588,7 @@ void student_search(char *id) {
 	int i, j;
 	FILE *in;
 	errno_t err;
-	char filename_in[20] = "info.txt";
+	char filename_in[20] = "score.txt";
 	int success = 0; /*成功登录的标记*/
 	Student stu[N];
 	char course = 'A';
@@ -618,15 +616,16 @@ void student_search(char *id) {
 	/* 将成绩打印到屏幕上 */
 	for (i = 0; i < num.stu; i++) {
 		if (strcmp(id, stu[i].id) == 0) {
+			
 			printf("学生%s的成绩单：\n", id);
 			for (j = 0; j < num.course; j++, course++) {
-				printf("课程%c ", course);
+				printf("课程%c\t", course);
 			}
 			printf("总成绩\n");
 			for (j = 0; j < num.course; j++) {
-				printf("%6.2f", stu[i].score[j]);
+				printf(" %.1f\t", stu[i].score[j]);
 			}
-			printf("%6.2f\n", stu[i].sum);
+			printf(" %.1f\n", stu[i].sum);
 			break;
 		}
 	}
