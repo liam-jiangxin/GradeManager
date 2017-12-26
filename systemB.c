@@ -3,40 +3,13 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-#include<conio.h>
+#include <conio.h>
 #include <ctype.h>
-#define M 10 /*最大课程数量*/
-#define N 50 /*学号、密码最大长度, 学生数量*/
-#define USER "admin"
-#define PWD "admin"
-#define MAX_PWD 50
-#define MAX_USER 50
+#include "classStructure.h"
+#include "loginSystem.h"
+#include "coreFunction.h"
 
-
-typedef struct {
-	char id[N];
-	char pwd[N];
-	float score[M];
-	float sum;
-}Student;
-typedef struct {
-	int course; /*课程数量*/
-	int stu; /*学生数量*/
-}Num;
-
-char *login(int choice); /*登录系统，登录失败返回-1，成功返回学生序号（若为老师返回非负值）*/
-Num score();
-void report( Num num);
-void sort( Num num);
-void search( Num num);
-void student_search(char *id);
-void modify(char *id); /*修改密码*/
-void teacher(); /*教师操作界面*/
-void student(char *id); /*学生操作界面，可以查询自己的成绩和修改密码*/
-void passwd(char *pwd);
-void modtch();
-
-Num num = { 0, 0 };
+Num num = { 0, 0 }; /*全局变量，携带学生数和课程数*/
 
 void main() {
 	int choice; /*菜单选择变量*/
@@ -75,38 +48,31 @@ void main() {
 	fscanf_s(fp, "%s", tch_act, N);
 	fclose(fp);
 	
-	printf("\t\t-----------------欢迎使用学生成绩管理系统！----------------------\n");
-	printf("\t\t| 教师登录                                            \t- 请输入1 |\n");
-	printf("\t\t| 学生登录                                            \t- 请输入2 |\n");
-	printf("\t\t| 退出                                            \t- 请输入3 |\n");
-	printf("\n\n输入您的选择：");
-	scanf_s("%d", &choice);
-	getchar();
-	while (choice != 1 && choice != 2) {
-		if (choice == 3) {
-			printf("成功退出！\n");
-			system("pause");
-			return;
+	welcome(&choice);
+	while (choice != 3) {
+		while (choice != 1 && choice != 2) {
+			printf("输入有误，请重新输入:");
+			scanf_s("%d", &choice);
+			getchar();
 		}
-		printf("输入有误，请重新输入:");
-		scanf_s("%d", &choice);
-		getchar();
+		/*通过login()返回值判断用户身份，若验证通过，给出操作界面*/
+		if (choice == 1 && strcmp((which = login(choice)), fail)) {
+			printf("\n教师%s, 您已成功登录！\n\n", tch_act);
+			system("pause");
+			system("cls");
+			teacher();
+		}
+		else if (choice == 2 && strcmp((which = login(choice)), fail)) {
+			strcpy_s(id, MAX_USER, which);
+			printf("\n学生%s, 您已成功登录！\n\n", id);
+			system("pause");
+			system("cls");
+			student(id);
+		}
+		if (strcmp(which, fail) == 0) break;
+		welcome(&choice);
+
 	}
-	/*通过login()返回值判断用户身份，若验证通过，给出操作界面*/
-	if (choice == 1 && strcmp((which = login(choice)), fail)){
-		printf("\n教师%s, 您已成功登录！\n\n",tch_act);
-		system("pause");
-		system("cls");
-		teacher();
-	}
-	else if (choice == 2 && strcmp((which = login(choice)), fail)) {
-		strcpy_s(id, MAX_USER, which);
-		printf("\n学生%s, 您已成功登录！\n\n", id);
-		system("pause");
-		system("cls");
-		student(id);
-	}
-	
 }
 
 Num score() {
@@ -359,7 +325,6 @@ void search( Num num) {
 }
 
 void sort_by_course(Student *course_rank, Num num, int cour) {
-	Student stu[N];
 	int i, j, k;
 	Student temp;
 	/*选择法排序*/
@@ -380,7 +345,6 @@ void sort_by_course(Student *course_rank, Num num, int cour) {
 }
 
 void sort_by_final(Student *final_rank, Num num) {
-	Student stu[N];
 	int i, j, k;
 	Student temp;
 	/*算出每个人的总成绩*/
@@ -408,7 +372,6 @@ void sort_by_final(Student *final_rank, Num num) {
 }
 
 void teacher() {
-	Student stu[N];
 	int choice;
 	while (1) { 
 		printf("\t\t--------------------欢迎使用学生成绩管理系统！---------------------\n");
@@ -456,7 +419,6 @@ void teacher() {
 }
 
 void student(char *id){
-	Student stu[N];
 	int choice;
 	while (1) {
 		printf("\t--------------------欢迎使用学生成绩管理系统！----------------------\n");
@@ -480,7 +442,7 @@ void student(char *id){
 			break;
 		case 3: printf("-----------------退出系统--------------\n");
 			return;
-		default: printf("guna\n");
+		default: printf("输入错误，重新输入！\n");
 		}
 		system("pause");
 		system("cls");
@@ -624,7 +586,6 @@ void modify(char *id) {
 }
 
 void modtch() {
-	int i;
 	FILE *fp;
 	FILE *fp1;
 	errno_t err;
@@ -634,10 +595,11 @@ void modtch() {
 	char tch_act[N], tch_pwd[N];
 	char confirm_pwd[MAX_PWD];
 	char new_pwd[MAX_PWD];
+	char filename[20] = "teacher.txt";
 
-	/*从inftch.txt读取数据*/
-	if ((err = fopen_s(&fp, "teacher.txt", "r")) != 0) {
-		printf("无法打开(r)\"%s\"\n");
+	/*从teacher.txt读取数据*/
+	if ((err = fopen_s(&fp, filename, "r")) != 0) {
+		printf("无法打开\"%s\"\n", filename);
 		system("pause");
 		exit(0);
 	}
@@ -658,9 +620,9 @@ void modtch() {
 	}
 	fclose(fp);
 	
-	/* 修改inftch.txt 文件 */
-	if ((err1 = fopen_s(&fp1, "teacher.txt", "w")) != 0) {
-		printf("无法打开(w)\"%s\"\n", "teacher.txt");
+	/* 修改teacher.txt 文件 */
+	if ((err1 = fopen_s(&fp1, filename, "w")) != 0) {
+		printf("无法打开(w)\"%s\"\n", filename);
 		system("pause");
 		exit(0);
 		
@@ -668,6 +630,7 @@ void modtch() {
 	fprintf(fp1, "%s %s", tch_act, tch_pwd);
 	fclose(fp1);
 }
+
 void student_search(char *id) {
 	int i, j;
 	FILE *in;
@@ -735,5 +698,16 @@ void passwd(char *pwd) {
 	}
 	putchar('\n');
 	pwd[i] = '\0';
+}
+
+void welcome(int *ptchoice) {
+	system("cls");
+	printf("\t\t-----------------欢迎使用学生成绩管理系统！----------------------\n");
+	printf("\t\t| 教师登录                                            \t- 请输入1 |\n");
+	printf("\t\t| 学生登录                                            \t- 请输入2 |\n");
+	printf("\t\t| 退出                                            \t- 请输入3 |\n");
+	printf("\n\n输入您的选择：");
+	scanf_s("%d", ptchoice);
+	getchar();
 }
 

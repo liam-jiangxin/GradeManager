@@ -25,4 +25,15 @@ by 李姜辛
 On master
 by 李姜辛、闫熠光
 
+成绩管理系统v2.0.5(2017-12-26):
+将函数定义、宏定义、结构体定义写入头文件；将登录界面分为两级，可从后一级回到前一级
+On master
+by 李姜辛
+
 systemB.c: 管理系统主文件，调用函数
+
+classStructure.h: 结构体定义（Student类型，Num类型)
+
+coreFunction.h：核心功能函数(score, report, sort, search)
+
+loginSystem.h: 登录(1,2级)界面、认证系统，老师学生操作界面函数
